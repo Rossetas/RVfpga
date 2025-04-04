@@ -1,6 +1,6 @@
 TOP_MODULE = rvfpgasim
 VC_FILE = swervolf_0.7.vc
-VERILATOR_OPTIONS = --trace -Wno-fatal --timescale-override /1ns
+VERILATOR_OPTIONS = --trace -Wno-fatal --timescale-override /1ns --timing
 
 #Assume a local installation if VERILATOR_ROOT is set
 ifeq ($(VERILATOR_ROOT),)

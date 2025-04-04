@@ -200,6 +200,7 @@
 ../src/SweRVolfSoC/BootROM/wb_mem_wrapper.v
 ../src/SweRVolfSoC/Peripherals/SystemController/swervolf_syscon.sv
 ../src/SweRVolfSoC/swervolf_core.v
+../src/SweRVolfSoC/cache_top.v
 ../src/OtherSources/axi_mem_wrapper.v
 ../src/rvfpgasim.v
 

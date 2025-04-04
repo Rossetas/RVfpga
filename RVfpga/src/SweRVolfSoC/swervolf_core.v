@@ -36,6 +36,7 @@ module swervolf_core
     input wire 	       i_flash_miso,
     input wire 	       i_uart_rx,
     output wire        o_uart_tx,
+    
     output wire [5:0]  o_ram_awid,
     output wire [31:0] o_ram_awaddr,
     output wire [7:0]  o_ram_awlen,
@@ -47,7 +48,9 @@ module swervolf_core
     output wire [3:0]  o_ram_awregion,
     output wire [3:0]  o_ram_awqos,
     output wire        o_ram_awvalid,
+
     input wire 	       i_ram_awready,
+
     output wire [5:0]  o_ram_arid,
     output wire [31:0] o_ram_araddr,
     output wire [7:0]  o_ram_arlen,
@@ -59,25 +62,36 @@ module swervolf_core
     output wire [3:0]  o_ram_arregion,
     output wire [3:0]  o_ram_arqos,
     output wire        o_ram_arvalid,
+
     input wire 	       i_ram_arready,
+
     output wire [63:0] o_ram_wdata,
     output wire [7:0]  o_ram_wstrb,
     output wire        o_ram_wlast,
     output wire        o_ram_wvalid,
+
     input wire 	       i_ram_wready,
+
     input wire [5:0]   i_ram_bid,
     input wire [1:0]   i_ram_bresp,
     input wire 	       i_ram_bvalid,
     output wire        o_ram_bready,
+
     input wire [5:0]   i_ram_rid,
     input wire [63:0]  i_ram_rdata,
     input wire [1:0]   i_ram_rresp,
     input wire 	       i_ram_rlast,
     input wire 	       i_ram_rvalid,
+
     output wire        o_ram_rready,
+
     input wire 	       i_ram_init_done,
     input wire 	       i_ram_init_error,
     inout wire [31:0]  io_data,
+    //---------------------------------------------
+    //Paso 4: Ahora el swervolf_core tiene un salida para los datos de los botones.
+    inout wire [31:0]  io_bttns,
+    //---------------------------------------------
     output wire [ 7          :0] AN,
     output wire [ 6          :0] Digits_Bits,
     output wire        o_accel_sclk,
@@ -217,7 +231,9 @@ module swervolf_core
    syscon
      (.i_clk            (clk),
       .i_rst            (wb_rst),
-      .gpio_irq         (gpio_irq),
+      //***********************************************************
+      .irq_or_gpio      (irq_or_gpio),
+      //***********************************************************
       .ptc_irq          (ptc_irq),
       .o_timer_irq      (timer_irq),
       .o_sw_irq3        (sw_irq3),
@@ -301,6 +317,13 @@ module swervolf_core
    wire        gpio_irq;
    wire [31:0] i_gpio;
    wire [31:0] o_gpio;
+   //-----------------------------------------------------------
+   //Paso 5: Nuevos cables para conectar los botones y buses. 
+   wire [31:0] en_gpio_bttns;
+   wire        gpio_irq_bttns;
+   wire [31:0] i_gpio_bttns;
+   wire [31:0] o_gpio_bttns;
+   //-----------------------------------------------------------
 
    bidirec gpio0  (.oe(en_gpio[0] ), .inp(o_gpio[0] ), .outp(i_gpio[0] ), .bidir(io_data[0] ));
    bidirec gpio1  (.oe(en_gpio[1] ), .inp(o_gpio[1] ), .outp(i_gpio[1] ), .bidir(io_data[1] ));
@@ -334,6 +357,11 @@ module swervolf_core
    bidirec gpio29 (.oe(en_gpio[29]), .inp(o_gpio[29]), .outp(i_gpio[29]), .bidir(io_data[29]));
    bidirec gpio30 (.oe(en_gpio[30]), .inp(o_gpio[30]), .outp(i_gpio[30]), .bidir(io_data[30]));
    bidirec gpio31 (.oe(en_gpio[31]), .inp(o_gpio[31]), .outp(i_gpio[31]), .bidir(io_data[31]));
+   bidirec gpio32 (.oe(en_gpio_bttns[0]), .inp(o_gpio_bttns[0]), .outp(i_gpio_bttns[0]), .bidir(io_bttns[0]));
+   bidirec gpio33 (.oe(en_gpio_bttns[1]), .inp(o_gpio_bttns[1]), .outp(i_gpio_bttns[1]), .bidir(io_bttns[1]));
+   bidirec gpio34 (.oe(en_gpio_bttns[2]), .inp(o_gpio_bttns[2]), .outp(i_gpio_bttns[2]), .bidir(io_bttns[2]));
+   bidirec gpio35 (.oe(en_gpio_bttns[3]), .inp(o_gpio_bttns[3]), .outp(i_gpio_bttns[3]), .bidir(io_bttns[3]));
+   bidirec gpio36 (.oe(en_gpio_bttns[4]), .inp(o_gpio_bttns[4]), .outp(i_gpio_bttns[4]), .bidir(io_bttns[4]));
 
    gpio_top gpio_module(
         .wb_clk_i     (clk), 
@@ -353,7 +381,33 @@ module swervolf_core
         .ext_pad_o     (o_gpio[31:0]),
         .ext_padoe_o   (en_gpio));
 
+   //-----------------------------------------------------------
+   //Paso 6: se crea la nueva instancia de GPIO para los botones.
+   gpio_top gpio_module_bttns(
+        .wb_clk_i     (clk), 
+        .wb_rst_i     (wb_rst), 
+        .wb_cyc_i     (wb_m2s_gpio_bttns_cyc), 
+        .wb_adr_i     ({2'b0,wb_m2s_gpio_bttns_adr[5:2],2'b0}), 
+        .wb_dat_i     (wb_m2s_gpio_bttns_dat), 
+        .wb_sel_i     (4'b1111),
+        .wb_we_i      (wb_m2s_gpio_bttns_we), 
+        .wb_stb_i     (wb_m2s_gpio_bttns_stb), 
+        .wb_dat_o     (wb_s2m_gpio_bttns_dat),
+        .wb_ack_o     (wb_s2m_gpio_bttns_ack), 
+        .wb_err_o     (wb_s2m_gpio_bttns_err),
+        .wb_inta_o    (gpio_irq_bttns),
+        .ext_pad_i    (i_gpio_bttns[31:0]),
+        .ext_pad_o    (o_gpio_bttns[31:0]),
+        .ext_padoe_o  (en_gpio_bttns));
+   //-----------------------------------------------------------
 
+   //***********************************************************
+   //***********************************************************
+   // Practica 9 - Ejercicio 2
+   wire irq_or_gpio;
+   assign irq_or_gpio = (gpio_irq | gpio_irq_bttns);
+   //***********************************************************
+   //***********************************************************
 
    // PTC
    wire        ptc_irq;

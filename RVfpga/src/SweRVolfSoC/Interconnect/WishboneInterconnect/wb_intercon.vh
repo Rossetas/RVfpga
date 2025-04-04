@@ -73,6 +73,22 @@ wire        wb_s2m_gpio_ack;
 wire        wb_s2m_gpio_err;
 wire        wb_s2m_gpio_rty;
 
+//----------------------------------------
+//Paso 7: Definir los cables para conectar nueva GPIO.
+// GPIO_BTTNS
+wire [31:0] wb_m2s_gpio_bttns_adr;
+wire [31:0] wb_m2s_gpio_bttns_dat;
+wire  [3:0] wb_m2s_gpio_bttns_sel;
+wire        wb_m2s_gpio_bttns_we;
+wire        wb_m2s_gpio_bttns_cyc;
+wire        wb_m2s_gpio_bttns_stb;
+wire  [2:0] wb_m2s_gpio_bttns_cti;
+wire  [1:0] wb_m2s_gpio_bttns_bte;
+wire [31:0] wb_s2m_gpio_bttns_dat;
+wire        wb_s2m_gpio_bttns_ack;
+wire        wb_s2m_gpio_bttns_err;
+wire        wb_s2m_gpio_bttns_rty;
+//----------------------------------------
 // PTC
 wire [31:0] wb_m2s_ptc_adr;
 wire [31:0] wb_m2s_ptc_dat;
@@ -177,6 +193,21 @@ wb_intercon wb_intercon0
     .wb_gpio_ack_i      (wb_s2m_gpio_ack),
     .wb_gpio_err_i      (wb_s2m_gpio_err),
     .wb_gpio_rty_i      (wb_s2m_gpio_rty),
+    //----------------------------------------
+    //Paso 8: Conectar el bus de datos con la GPIO.
+    // GPIO
+    .wb_gpio_bttns_adr_o      (wb_m2s_gpio_bttns_adr),
+    .wb_gpio_bttns_dat_o      (wb_m2s_gpio_bttns_dat),
+    .wb_gpio_bttns_sel_o      (wb_m2s_gpio_bttns_sel),
+    .wb_gpio_bttns_we_o       (wb_m2s_gpio_bttns_we),
+    .wb_gpio_bttns_cyc_o      (wb_m2s_gpio_bttns_cyc),
+    .wb_gpio_bttns_stb_o      (wb_m2s_gpio_bttns_stb),
+    .wb_gpio_bttns_cti_o      (wb_m2s_gpio_bttns_cti),
+    .wb_gpio_bttns_bte_o      (wb_m2s_gpio_bttns_bte),
+    .wb_gpio_bttns_dat_i      (wb_s2m_gpio_bttns_dat),
+    .wb_gpio_bttns_ack_i      (wb_s2m_gpio_bttns_ack),
+    .wb_gpio_bttns_err_i      (wb_s2m_gpio_bttns_err),
+    .wb_gpio_bttns_rty_i      (wb_s2m_gpio_bttns_rty),
 // PTC
     .wb_ptc_adr_o      (wb_m2s_ptc_adr),
     .wb_ptc_dat_o      (wb_m2s_ptc_dat),
